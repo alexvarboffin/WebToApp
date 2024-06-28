@@ -1,6 +1,6 @@
 package com.tjeannin.apprate;
 
-/* loaded from: classes.dex */
+
 public class PrefsContract {
     public static final String PREF_APP_HAS_CRASHED = "pref_app_has_crashed";
     public static final String PREF_DATE_FIRST_LAUNCH = "date_firstlaunch";

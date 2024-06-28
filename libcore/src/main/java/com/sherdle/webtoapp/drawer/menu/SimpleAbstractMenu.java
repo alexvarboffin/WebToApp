@@ -2,6 +2,9 @@ package com.sherdle.webtoapp.drawer.menu;
 
 import android.view.Menu;
 import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -11,13 +14,13 @@ import com.sherdle.webtoapp.R;
 public abstract class SimpleAbstractMenu {
     protected MenuItemCallback callback;
     protected Menu menu;
-    protected Map<MenuItem, Action> menuContent = new LinkedHashMap();
+    protected Map<MenuItem, Action> menuContent = new LinkedHashMap<>();
 
-    /*Access modifiers changed from: protected */
+    
     public MenuItem add(Menu menu, String str, int i, final Action action) {
         MenuItem onMenuItemClickListener = menu.add(R.id.main_group, 0, 0, str).setCheckable(true).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() { // from class: com.sherdle.webtoapp.drawer.menu.SimpleAbstractMenu.1
-            @Override // android.view.MenuItem.OnMenuItemClickListener
-            public boolean onMenuItemClick(MenuItem menuItem) {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
                 SimpleAbstractMenu.this.callback.menuItemClicked(action, menuItem);
                 return true;
             }
@@ -29,7 +32,7 @@ public abstract class SimpleAbstractMenu {
         return onMenuItemClickListener;
     }
 
-    /*Access modifiers changed from: protected */
+
     public Menu getMenu() {
         return this.menu;
     }

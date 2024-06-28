@@ -1,10 +1,12 @@
 package com.sherdle.webtoapp.widget;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
@@ -34,7 +36,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
 import androidx.fragment.app.Fragment;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -50,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+
 import com.sherdle.webtoapp.R;
 
 
@@ -78,7 +83,7 @@ public class AdvancedWebView extends WebView {
     public ScrollInterface mScrollInterface;
     public AdvancedWebView mToolbarWebView;
 
-    
+
     public interface Listener {
         void onDownloadRequested(String str, String str2, String str3, String str4, long j);
 
@@ -91,7 +96,7 @@ public class AdvancedWebView extends WebView {
         void onPageStarted(String str, Bitmap bitmap);
     }
 
-    
+
     public interface ScrollInterface {
         void onScrollChanged(AdvancedWebView advancedWebView, int i, int i2, int i3, int i4);
     }
@@ -512,31 +517,37 @@ public class AdvancedWebView extends WebView {
                 }
             }
         });
-        super.setWebChromeClient(new WebChromeClient() { // from class: com.sherdle.webtoapp.widget.AdvancedWebView.2
-            public void openFileChooser(ValueCallback<Uri> valueCallback) {
-                openFileChooser(valueCallback, null);
+        super.setWebChromeClient(new WebChromeClient() {
+            // file upload callback (Android 2.2 (API level 8) -- Android 2.3 (API level 10)) (hidden method)
+            @SuppressWarnings("unused")
+            public void openFileChooser(ValueCallback<Uri> uploadMsg) {
+                openFileChooser(uploadMsg, null);
             }
 
-            public void openFileChooser(ValueCallback<Uri> valueCallback, String str2) {
-                openFileChooser(valueCallback, str2, null);
+            // file upload callback (Android 3.0 (API level 11) -- Android 4.0 (API level 15)) (hidden method)
+            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
+                openFileChooser(uploadMsg, acceptType, null);
             }
 
-            public void openFileChooser(ValueCallback<Uri> valueCallback, String str2, String str3) {
-                AdvancedWebView.this.openFileInput(valueCallback, null, new String[]{str2});
+            // file upload callback (Android 4.1 (API level 16) -- Android 4.3 (API level 18)) (hidden method)
+            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
+                openFileInput(uploadMsg, null);
             }
 
-            @Override // android.webkit.WebChromeClient
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> valueCallback, WebChromeClient.FileChooserParams fileChooserParams) {
-                AdvancedWebView.this.openFileInput(null, valueCallback, fileChooserParams.getAcceptTypes());
+            // file upload callback (Android 5.0 (API level 21) -- current) (public method)
+            @SuppressWarnings("all")
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                openFileInput(null, filePathCallback);
                 return true;
             }
 
-            @Override // android.webkit.WebChromeClient
-            public void onProgressChanged(WebView webView, int i) {
-                if (AdvancedWebView.this.mCustomWebChromeClient != null) {
-                    AdvancedWebView.this.mCustomWebChromeClient.onProgressChanged(webView, i);
-                } else {
-                    super.onProgressChanged(webView, i);
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                if (mCustomWebChromeClient != null) {
+                    mCustomWebChromeClient.onProgressChanged(view, newProgress);
+                }
+                else {
+                    super.onProgressChanged(view, newProgress);
                 }
             }
 
@@ -868,18 +879,27 @@ public class AdvancedWebView extends WebView {
         return new String(Base64.decode(str, 0), CHARSET_DEFAULT);
     }
 
-    /* JADX WARN: Removed duplicated region for block: B:18:0x009b  */
-    /* JADX WARN: Removed duplicated region for block: B:20:0x00a0  */
-    /*
-        Code decompiled incorrectly, please refer to instructions dump.
-        To view partially-correct code enable 'Show inconsistent code' option in preferences
-    */
-    protected void openFileInput(android.webkit.ValueCallback<android.net.Uri> r7, android.webkit.ValueCallback<android.net.Uri[]> r8, java.lang.String[] r9) {
-        /*
-            Method dump skipped, instructions count: 257
-            To view this dump change 'Code comments level' option to 'DEBUG'
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.sherdle.webtoapp.widget.AdvancedWebView.openFileInput(android.webkit.ValueCallback, android.webkit.ValueCallback, java.lang.String[]):void");
+    @SuppressLint("NewApi")
+    protected void openFileInput(final ValueCallback<Uri> fileUploadCallbackFirst, final ValueCallback<Uri[]> fileUploadCallbackSecond) {
+        if (mFileUploadCallbackFirst != null) {
+            mFileUploadCallbackFirst.onReceiveValue(null);
+        }
+        mFileUploadCallbackFirst = fileUploadCallbackFirst;
+
+        if (mFileUploadCallbackSecond != null) {
+            mFileUploadCallbackSecond.onReceiveValue(null);
+        }
+        mFileUploadCallbackSecond = fileUploadCallbackSecond;
+
+        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+
+        if (mFragment != null && mFragment.get() != null && Build.VERSION.SDK_INT >= 11) {
+            mFragment.get().startActivityForResult(Intent.createChooser(i, getFileUploadPromptLabel()), mRequestCodeFilePicker);
+        } else if (mActivity != null && mActivity.get() != null) {
+            mActivity.get().startActivityForResult(Intent.createChooser(i, getFileUploadPromptLabel()), mRequestCodeFilePicker);
+        }
     }
 
     private File createImageFile() throws IOException {
@@ -908,7 +928,7 @@ public class AdvancedWebView extends WebView {
             request.setNotificationVisibility(1);
         }
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, str2);
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService("download");
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         try {
             try {
                 downloadManager.enqueue(request);
@@ -925,22 +945,27 @@ public class AdvancedWebView extends WebView {
         }
     }
 
-    private static boolean openAppSettings(Context context, String str) {
+    @SuppressLint("NewApi")
+    private static boolean openAppSettings(final Context context, final String packageName) {
         if (Build.VERSION.SDK_INT < 9) {
             throw new RuntimeException("Method requires API level 9 or above");
         }
+
         try {
-            Intent intent = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
-            intent.setData(Uri.parse("package:" + str));
-            intent.setFlags(268435456);
+            final Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(Uri.parse("package:" + packageName));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             context.startActivity(intent);
+
             return true;
-        } catch (Exception unused) {
+        }
+        catch (Exception e) {
             return false;
         }
     }
 
-    
+
     public static class Browsers {
         private static String mAlternativePackage;
 
@@ -948,47 +973,71 @@ public class AdvancedWebView extends WebView {
             return getAlternative(context) != null;
         }
 
-        public static String getAlternative(Context context) {
-            String str = mAlternativePackage;
-            if (str != null) {
-                return str;
+        /**
+         * Returns the package name of an alternative browser with its own rendering engine or `null`
+         *
+         * @param context a valid `Context` reference
+         * @return the package name or `null`
+         */
+        public static String getAlternative(final Context context) {
+            if (mAlternativePackage != null) {
+                return mAlternativePackage;
             }
-            List asList = Arrays.asList(AdvancedWebView.ALTERNATIVE_BROWSERS);
-            for (ApplicationInfo applicationInfo : context.getPackageManager().getInstalledApplications(128)) {
-                if (applicationInfo.enabled && asList.contains(applicationInfo.packageName)) {
-                    mAlternativePackage = applicationInfo.packageName;
-                    return applicationInfo.packageName;
+
+            final List<String> alternativeBrowsers = Arrays.asList(ALTERNATIVE_BROWSERS);
+            final List<ApplicationInfo> apps = context.getPackageManager().getInstalledApplications(PackageManager.GET_META_DATA);
+
+            for (ApplicationInfo app : apps) {
+                if (!app.enabled) {
+                    continue;
+                }
+
+                if (alternativeBrowsers.contains(app.packageName)) {
+                    mAlternativePackage = app.packageName;
+
+                    return app.packageName;
                 }
             }
+
             return null;
         }
+
 
         public static void openUrl(Activity activity, String str) {
             openUrl(activity, str, false);
         }
 
-        public static void openUrl(Activity activity, String str, boolean z) {
-            Intent intent = new Intent("android.intent.action.VIEW", Uri.parse(str));
-            intent.setPackage(getAlternative(activity));
-            intent.addFlags(268435456);
-            activity.startActivity(intent);
-            if (z) {
-                activity.overridePendingTransition(0, 0);
+        /**
+         * Opens the given URL in an alternative browser
+         *
+         * @param context a valid `Activity` reference
+         * @param url the URL to open
+         * @param withoutTransition whether to switch to the browser `Activity` without a transition
+         */
+        public static void openUrl(final Activity context, final String url, final boolean withoutTransition) {
+            final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            intent.setPackage(getAlternative(context));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            context.startActivity(intent);
+
+            if (withoutTransition) {
+                context.overridePendingTransition(0, 0);
             }
         }
+
     }
 
-    @Override // android.webkit.WebView, android.view.View
-    protected void onScrollChanged(int i, int i2, int i3, int i4) {
-        super.onScrollChanged(i, i2, i3, i4);
-        ScrollInterface scrollInterface = this.mScrollInterface;
-        if (scrollInterface != null) {
-            scrollInterface.onScrollChanged(this.mToolbarWebView, i, i2, i3, i4);
-        }
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        super.onScrollChanged(l, t, oldl, oldt);
+        if (mScrollInterface != null)
+            mScrollInterface.onScrollChanged(mToolbarWebView, l, t, oldl, oldt);
     }
 
-    public void setOnScrollChangeListener(AdvancedWebView advancedWebView, ScrollInterface scrollInterface) {
+    public void setOnScrollChangeListener(AdvancedWebView toolbarWebView, ScrollInterface scrollInterface) {
+
         this.mScrollInterface = scrollInterface;
-        this.mToolbarWebView = advancedWebView;
+        this.mToolbarWebView = toolbarWebView;
     }
 }

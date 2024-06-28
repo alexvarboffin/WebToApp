@@ -278,13 +278,13 @@ public class MainActivity extends AppCompatActivity implements MenuItemCallback 
         return super.onOptionsItemSelected(menuItem);
     }
 
-    /*Access modifiers changed from: protected */
+    
     @Override
     public void onPause() {
         super.onPause();
     }
 
-    /*Access modifiers changed from: protected */
+    
     @Override
     public void onResume() {
         super.onResume();

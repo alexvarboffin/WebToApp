@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import java.lang.Thread;
 
-/* loaded from: classes.dex */
+
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     private Thread.UncaughtExceptionHandler defaultExceptionHandler;
     SharedPreferences preferences;
