@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="about">О приложении</string>
+    <string name="ad_interstitial_id" />
+    <string name="app_name">Карта звездного неба</string>
+
+</resources>

@@ -1,0 +1,33 @@
+{
+  "ANALYTICS_ID": "",
+  "COLLAPSING_ACTIONBAR": false,
+  "HIDE_ACTIONBAR": true,
+  "HIDE_DRAWER_HEADER": false,
+  "HIDE_MENU_HOME": false,
+  "HIDE_MENU_NAVIGATION": false,
+  "HIDE_MENU_SHARE": false,
+  "HIDE_TABS": true,
+  "INTERSTITIAL_INTERVAL": 2,
+  "INTERSTITIAL_PAGE_LOAD": true,
+  "LIGHT_TOOLBAR_THEME": false,
+  "LOAD_AS_PULL": true,
+  "MULTI_WINDOWS": false,
+  "NO_CONNECTION_PAGE": "",
+  "PULL_TO_REFRESH": false,
+  "SHOW_NOTIFICATION_SETTINGS": false,
+  "SPLASH": true,
+  "SPLASH_SCREEN_DELAY": 800,
+  "STATIC_TOOLBAR_TITLE": false,
+  "TOOLBAR_ICON": 0,
+  "USE_DRAWER": false,
+  "TITLES": [
+    ""
+  ],
+  "URLS": [
+    "https://google.com"
+  ],
+  "ICONS": [],
+  "OPEN_OUTSIDE_WEBVIEW": [],
+  "OPEN_ALL_OUTSIDE_EXCEPT": [],
+  "PERMISSIONS_REQUIRED": []
+}
